@@ -1,4 +1,4 @@
-package weigl.poordi;
+package com.github.wadoon;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,8 +22,8 @@ public class TestSimple {
     }
 
     @Test
-    public void test() throws InvocationTargetException, IllegalAccessException {
-        Registry r = new Registry();
+    public void test()  {
+        DefaultRegistry r = new DefaultRegistry();
         r.register(PrintService.class, new ConsolePrintService());
         r.inject(this);
         Assert.assertNotNull(printer);

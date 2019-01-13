@@ -1,4 +1,4 @@
-package weigl.poordi;
+package com.github.wadoon;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 public class CtorTest {
     @Test
     public void test() throws InvocationTargetException, IllegalAccessException, InstantiationException {
-        Registry r = new Registry();
+        DefaultRegistry r = new DefaultRegistry();
         r.register(PrintService.class, new ConsolePrintService());
         var test = r.getInstance(TestObject.class);
         Assert.assertNotNull(test);

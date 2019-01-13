@@ -1,27 +1,19 @@
-package weigl.poordi;
+package com.github.wadoon;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Registry {
-    private Map<Class<?>, Object> mapping = new HashMap<>();
-
-    public <T> Object register(Class<T> clazz, T instance) {
-        return mapping.put(clazz, instance);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> clazz) {
-        return (T) mapping.get(clazz);
-    }
-
-    public <T> T getInstance(Class<T> clazz) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+/**
+ * @author Alexander Weigl
+ * @version 1 (13.01.19)
+ */
+public abstract class AbstractRegistry implements Injector, Registry {
+    @Override
+    public <T> T getInstance(Class<T> clazz) throws InjectionException {
         for (var ctor : clazz.getConstructors()) {
             if (ctor.getAnnotation(Inject.class) != null) {
                 T instance = (T) tryToInject(ctor);
@@ -32,18 +24,23 @@ public class Registry {
         return null;
     }
 
-    private <T> T tryToInject(Constructor<T> ctor) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    protected <T> T tryToInject(Constructor<T> ctor) throws InjectionException {
         var services = Arrays.stream(ctor.getParameterTypes())
                 .map(this::get)
                 .collect(Collectors.toUnmodifiableList());
 
         if (services.stream().allMatch(Objects::nonNull)) {
-            return ctor.newInstance(services.toArray());
+            try {
+                return ctor.newInstance(services.toArray());
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new InjectionException(e);
+            }
         }
         return null;
     }
 
-    public void inject(Object instance) throws InvocationTargetException, IllegalAccessException {
+    @Override
+    public void inject(Object instance) throws InjectionException {
         var clazz = instance.getClass();
         for (var setter : clazz.getMethods()) {
             if (setter.getAnnotation(Inject.class) != null) {
@@ -52,7 +49,7 @@ public class Registry {
         }
     }
 
-    private void inject(Object instance, Method setter) throws InvocationTargetException, IllegalAccessException {
+    protected void inject(Object instance, Method setter) throws InjectionException {
         if (setter.getParameterCount() != 1) {
             throw new IllegalStateException();
         }
@@ -62,7 +59,10 @@ public class Registry {
         if (o == null) {
             throw new IllegalStateException("Implementation for X not registered.");
         }
-
-        setter.invoke(instance, o);
+        try {
+            setter.invoke(instance, o);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new InjectionException(e);
+        }
     }
 }

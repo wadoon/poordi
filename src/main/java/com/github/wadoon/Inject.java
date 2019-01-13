@@ -1,4 +1,4 @@
-package weigl.poordi;
+package com.github.wadoon;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

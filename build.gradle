@@ -2,10 +2,12 @@ plugins {
     id 'java'
 }
 
-group 'weigl'
-version '1.0-SNAPSHOT'
+group 'com.github.wadoon'
+version '1.0'
 
-sourceCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
 
 repositories {
     mavenCentral()
